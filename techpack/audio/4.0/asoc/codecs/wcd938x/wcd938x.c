@@ -269,6 +269,8 @@ static int wcd938x_init_reg(struct snd_soc_codec *codec)
 				WCD938X_DIGITAL_EFUSE_REG_30) & 0x07) << 1));
 	snd_soc_update_bits(codec,
 				WCD938X_HPH_SURGE_HPHLR_SURGE_EN, 0xC0, 0xC0);
+	snd_soc_update_bits(codec,
+				WCD938X_MICB2_TEST_CTL_3, 0xFF, 0xA4);
 
 	return 0;
 }
@@ -763,6 +765,11 @@ static int wcd938x_codec_enable_hphr_pa(struct snd_soc_dapm_widget *w,
 			     WCD_CLSH_EVENT_PRE_DAC,
 			     WCD_CLSH_STATE_HPHR,
 			     hph_mode);
+		if (hph_mode == CLS_H_LP || hph_mode == CLS_H_LOHIFI ||
+		    hph_mode == CLS_H_ULP) {
+			snd_soc_update_bits(codec,
+				WCD938X_HPH_REFBUFF_LP_CTL, 0x01, 0x01);
+		}
 		wcd_clsh_set_hph_mode(codec, CLS_H_HIFI);
 		snd_soc_update_bits(codec, WCD938X_ANA_HPH,
 					      0x10, 0x10);
@@ -784,6 +791,12 @@ static int wcd938x_codec_enable_hphr_pa(struct snd_soc_dapm_widget *w,
 				usleep_range(20000, 20100);
 			else
 				usleep_range(7000, 7100);
+			if (hph_mode == CLS_H_LP ||
+			    hph_mode == CLS_H_LOHIFI ||
+			    hph_mode == CLS_H_ULP)
+				snd_soc_update_bits(codec,
+					WCD938X_HPH_REFBUFF_LP_CTL, 0x01,
+					0x00);
 			clear_bit(HPH_PA_DELAY, &wcd938x->status_mask);
 		}
 		snd_soc_update_bits(codec,
@@ -889,6 +902,11 @@ static int wcd938x_codec_enable_hphl_pa(struct snd_soc_dapm_widget *w,
 			     WCD_CLSH_STATE_HPHL,
 			     hph_mode);
 		wcd_clsh_set_hph_mode(codec, CLS_H_HIFI);
+		if (hph_mode == CLS_H_LP || hph_mode == CLS_H_LOHIFI ||
+		    hph_mode == CLS_H_ULP) {
+			snd_soc_update_bits(codec,
+				WCD938X_HPH_REFBUFF_LP_CTL, 0x01, 0x01);
+		}
 		snd_soc_update_bits(codec, WCD938X_ANA_HPH,
 						0x20, 0x20);
 		wcd_clsh_set_hph_mode(codec, hph_mode);
@@ -909,6 +927,12 @@ static int wcd938x_codec_enable_hphl_pa(struct snd_soc_dapm_widget *w,
 				usleep_range(20000, 20100);
 			else
 				usleep_range(7000, 7100);
+			if (hph_mode == CLS_H_LP ||
+			    hph_mode == CLS_H_LOHIFI ||
+			    hph_mode == CLS_H_ULP)
+				snd_soc_update_bits(codec,
+					WCD938X_HPH_REFBUFF_LP_CTL,
+					0x01, 0x00);
 			clear_bit(HPH_PA_DELAY, &wcd938x->status_mask);
 		}
 		snd_soc_update_bits(codec,
@@ -1901,7 +1925,7 @@ int wcd938x_micbias_control(struct snd_soc_codec *codec,
 						pre_off_event,
 						&wcd938x->mbhc->wcd_mbhc);
 			snd_soc_update_bits(codec, micb_reg,
-							0xC0, 0x00);
+							0xC0, 0xC0);
 			if (post_off_event && wcd938x->mbhc)
 				blocking_notifier_call_chain(
 						&wcd938x->mbhc->notifier,
@@ -3502,6 +3526,21 @@ static int wcd938x_reset_low(struct device *dev)
 struct wcd938x_pdata *wcd938x_populate_dt_data(struct device *dev)
 {
 	struct wcd938x_pdata *pdata = NULL;
+#ifdef CONFIG_SND_SOC_IMPED_SENSING
+	int rc = 0;
+	int i;
+	struct of_phandle_args imp_list;
+	struct wcd938x_gain_table default_table[MAX_IMPEDANCE_TABLE] = {
+	{	 0,       0, 6},
+	{	 1,      13, 0},
+	{	14,      25, 3},
+	{	26,      42, 4},
+	{	43,     100, 5},
+	{  101,     200, 7},
+	{  201,    1000, 8},
+	{ 1001, INT_MAX, 6},
+};
+#endif
 
 	pdata = devm_kzalloc(dev, sizeof(struct wcd938x_pdata),
 				GFP_KERNEL);
@@ -3531,6 +3570,26 @@ struct wcd938x_pdata *wcd938x_populate_dt_data(struct device *dev)
 	pdata->tx_slave = of_parse_phandle(dev->of_node, "qcom,tx-slave", 0);
 
 	wcd938x_dt_parse_micbias_info(dev, &pdata->micbias);
+
+#ifdef CONFIG_SND_SOC_IMPED_SENSING
+	for (i = 0; i < ARRAY_SIZE(pdata->imp_table); i++) {
+		rc = of_parse_phandle_with_args(dev->of_node,
+			"imp-table", "#list-imp-cells", i, &imp_list);
+		if (rc < 0) {
+			pdata->imp_table[i].min = default_table[i].min;
+			pdata->imp_table[i].max = default_table[i].max;
+			pdata->imp_table[i].gain = default_table[i].gain;
+		} else {
+			pdata->imp_table[i].min = imp_list.args[0];
+			pdata->imp_table[i].max = imp_list.args[1];
+			pdata->imp_table[i].gain = imp_list.args[2];
+		}
+		dev_info(dev, "impedance gain table %d, %d, %d\n",
+			pdata->imp_table[i].min,
+			pdata->imp_table[i].max,
+			pdata->imp_table[i].gain);
+	}
+#endif
 
 	return pdata;
 }

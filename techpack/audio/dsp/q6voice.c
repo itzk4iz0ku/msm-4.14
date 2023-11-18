@@ -1,6 +1,13 @@
-// SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+/*  Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  */
 #include <linux/slab.h>
 #include <linux/kthread.h>
@@ -23,6 +30,10 @@
 #include <ipc/apr_tal.h>
 #include "adsp_err.h"
 #include <dsp/voice_mhi.h>
+
+#ifdef CONFIG_SEC_SND_ADAPTATION
+#include <dsp/sec_adaptation.h>
+#endif /* CONFIG_SEC_SND_ADAPTATION */
 
 #define TIMEOUT_MS 300
 
@@ -146,6 +157,13 @@ static int voice_pack_and_set_cvp_param(struct voice_data *v,
 static int voice_pack_and_set_cvs_ui_property(struct voice_data *v,
 					      struct param_hdr_v3 param_hdr,
 					      u8 *param_data);
+
+#ifdef CONFIG_SEC_SND_ADAPTATION
+struct common_data *voice_get_common_data(void)
+{
+	return &common;
+}
+#endif /* CONFIG_SEC_SND_ADAPTATION */
 
 static void voice_itr_init(struct voice_session_itr *itr,
 			   u32 session_id)
@@ -544,6 +562,7 @@ static bool is_sub1_vsid(u32 session_id)
 	case VOLTE_SESSION_VSID:
 	case VOWLAN_SESSION_VSID:
 	case VOICEMMODE1_VSID:
+	case VOIP_SESSION_VSID:
 		ret = true;
 		break;
 	default:
@@ -2632,13 +2651,6 @@ static int voice_send_cvs_register_cal_cmd(struct voice_data *v)
 		pr_err("%s: Voice_get_cal failed for cal %d!\n",
 			__func__, CVS_VOCSTRM_CAL);
 
-		goto unlock;
-	}
-
-	if (col_data->cal_data.size >= MAX_COL_INFO_SIZE) {
-		pr_err("%s: Invalid cal data size %d!\n",
-			__func__, col_data->cal_data.size);
-		ret = -EINVAL;
 		goto unlock;
 	}
 
@@ -6857,7 +6869,9 @@ int voc_end_voice_call(uint32_t session_id)
 
 	if (v->voc_state == VOC_RUN || v->voc_state == VOC_ERROR ||
 	    v->voc_state == VOC_CHANGE || v->voc_state == VOC_STANDBY) {
-
+#ifdef CONFIG_SEC_SND_ADAPTATION
+		voice_sec_loopback_end_cmd(session_id);
+#endif /* CONFIG_SEC_SND_ADAPTATION */
 		pr_debug("%s: VOC_STATE: %d\n", __func__, v->voc_state);
 
 		ret = voice_destroy_vocproc(v);
@@ -7270,7 +7284,9 @@ int voc_start_voice_call(uint32_t session_id)
 			pr_err("start voice failed\n");
 			goto fail;
 		}
-
+#ifdef CONFIG_SEC_SND_ADAPTATION
+		voice_sec_loopback_start_cmd(session_id);
+#endif /* CONFIG_SEC_SND_ADAPTATION */
 		v->voc_state = VOC_RUN;
 	} else {
 		pr_err("%s: Error: Start voice called in state %d\n",
