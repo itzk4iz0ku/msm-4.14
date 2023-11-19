@@ -69,7 +69,6 @@
 	int freq = -1;\
 	_this->level++; \
 	MAX_T_INPUT_BOOSTER(freq, cpu_freq); \
-	pr_booster("[Input Booster2] %s      set_freq_limit : %d\n", glGage, freq); \
 	set_hmp(_this->param[_this->index].hmp_boost); \
 	set_qos(&_this->cpu_qos, /*PM_QOS_CPU_FREQ_MIN*/PM_QOS_CLUSTER1_FREQ_MIN, _this->param[_this->index].cpu_freq);  \
 	set_qos(&_this->kfc_qos, /*PM_QOS_KFC_FREQ_MIN*/PM_QOS_CLUSTER0_FREQ_MIN, _this->param[_this->index].kfc_freq);  \
@@ -80,7 +79,6 @@
 	int freq = -1;\
 	_this->level = -1; \
 	MAX_T_INPUT_BOOSTER(freq, cpu_freq); \
-	pr_booster("[Input Booster2] %s      set_freq_limit : %d\n", glGage, freq); \
 	set_hmp(0);  \
 	remove_qos(&_this->cpu_qos);  \
 	remove_qos(&_this->kfc_qos);  \
@@ -228,15 +226,6 @@ static u32 bus_hdl;
 #define set_hmp(level)
 #endif
 
-#ifndef CONFIG_CPU_FREQ_LIMIT_USERSPACE
-#define DVFS_TOUCH_ID	0
-int set_freq_limit(unsigned long id, unsigned int freq)
-{
-	pr_err("%s is not yet implemented\n", __func__);
-	return 0;
-}
-#endif
-
 #ifdef CONFIG_ARCH_QCOM
 static struct pm_qos_request lpm_bias_pm_qos_request;
 #define SET_BOOSTER  { \
@@ -250,7 +239,6 @@ static struct pm_qos_request lpm_bias_pm_qos_request;
 	set_hmp(value); \
 	MAX_T_INPUT_BOOSTER(value, cpu_freq); \
 	pr_booster("[Input Booster2] %s      set freq limit : %d\n", glGage, value); \
-	set_freq_limit(DVFS_TOUCH_ID, value);  \
 	MAX_T_INPUT_BOOSTER(value, ddr_freq);  \
 	ddr_new_value = trans_freq_to_idx(value); \
 	msm_bus_scale_client_update_request(bus_hdl, ddr_new_value);\
@@ -269,8 +257,6 @@ static struct pm_qos_request lpm_bias_pm_qos_request;
 	} \
 	set_hmp(value); \
 	MAX_T_INPUT_BOOSTER(value, cpu_freq); \
-	pr_booster("[Input Booster2] %s      set freq limit : %d\n", glGage, value); \
-	set_freq_limit(DVFS_TOUCH_ID, value);  \
 	msm_bus_scale_client_update_request(bus_hdl, 0);\
 	MAX_T_INPUT_BOOSTER(value, lpm_bias);  \
 	if (value == INPUT_BOOSTER_NULL) { \
@@ -288,8 +274,6 @@ static struct pm_qos_request lpm_bias_pm_qos_request;
 	} \
 	set_hmp(value); \
 	MAX_T_INPUT_BOOSTER(value, cpu_freq); \
-	pr_booster("[Input Booster2] %s      set_freq_limit : %d\n", glGage, value); \
-	set_freq_limit(DVFS_TOUCH_ID, value);  \
 }
 #define REMOVE_BOOSTER  { \
 	int value = -1;\
@@ -300,8 +284,6 @@ static struct pm_qos_request lpm_bias_pm_qos_request;
 	} \
 	set_hmp(value); \
 	MAX_T_INPUT_BOOSTER(value, cpu_freq); \
-	pr_booster("[Input Booster2] %s      set_freq_limit : %d\n", glGage, value); \
-	set_freq_limit(DVFS_TOUCH_ID, value);  \
 }
 #endif
 
