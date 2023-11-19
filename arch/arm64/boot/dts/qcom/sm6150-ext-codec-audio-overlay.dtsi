@@ -57,7 +57,7 @@
 };
 
 &qupv3_se4_spi {
-	status = "disabled";
+	status = "okay";
 };
 
 &tavil_wdsp {

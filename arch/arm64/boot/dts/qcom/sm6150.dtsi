@@ -478,10 +478,10 @@
 			reg = <0 0x85700000 0 0x600000>;
 		};
 
-		xbl_aop_mem: xbl_aop_mem@85d00000 {
+		xbl_aop_mem: xbl_aop_mem@85e00000 {
 			compatible = "removed-dma-pool";
 			no-map;
-			reg = <0x0 0x85d00000 0x0 0x240000>;
+			reg = <0x0 0x85e00000 0x0 0x140000>;
 		};
 
 		sec_apps_mem: sec_apps_region@85fff000 {
@@ -1480,7 +1480,7 @@
 		qcom,bus-width = <4>;
 		qcom,large-address-bus;
 
-		qcom,clk-rates = <300000 400000 20000000 25000000
+		qcom,clk-rates = <400000 20000000 25000000
 				50000000 100000000 202000000>;
 		qcom,bus-speed-mode = "SDR12", "SDR25", "SDR50", "DDR50",
 				      "SDR104";
@@ -1623,6 +1623,7 @@
 
 		lanes-per-direction = <1>;
 		dev-ref-clk-freq = <0>; /* 19.2 MHz */
+		spm-level = <5>;
 
 		clock-names =
 			"core_clk",
@@ -3074,12 +3075,21 @@
 		qcom,hw-settle-time = <200>;
 		qcom,pre-scaling = <1 1>;
 	};
+
+	quiet_therm {
+		reg = <ADC_GPIO4_PU2>;
+		label = "quiet_therm";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
 };
 
 &pm6150l_adc_tm {
 	io-channels = <&pm6150l_vadc ADC_AMUX_THM1_PU2>,
 			<&pm6150l_vadc ADC_AMUX_THM2_PU2>,
-			<&pm6150l_vadc ADC_GPIO1_PU2>;
+			<&pm6150l_vadc ADC_GPIO1_PU2>,
+			<&pm6150l_vadc ADC_GPIO4_PU2>;
 
 	/* Channel nodes */
 	emmc_ufs_therm {
@@ -3096,6 +3106,12 @@
 
 	camera_flash_therm {
 		reg = <ADC_GPIO1_PU2>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	quiet_therm {
+		reg = <ADC_GPIO4_PU2>;
 		qcom,ratiometric;
 		qcom,hw-settle-time = <200>;
 	};

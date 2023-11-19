@@ -359,6 +359,7 @@
 						  "temp-change",
 						  "temp-change-smb";
 			};
+
 			qcom,sdam@b100 {
 				reg = <0xb100 0x100>;
 				interrupts =
@@ -654,7 +655,6 @@
 	};
 
 	pm6150-bcl-lvl0 {
-		disable-thermal-zone;
 		polling-delay-passive = <100>;
 		polling-delay = <0>;
 		thermal-governor = "step_wise";
@@ -671,7 +671,6 @@
 	};
 
 	pm6150-bcl-lvl1 {
-		disable-thermal-zone;
 		polling-delay-passive = <100>;
 		polling-delay = <0>;
 		thermal-governor = "step_wise";
@@ -688,7 +687,6 @@
 	};
 
 	pm6150-bcl-lvl2 {
-		disable-thermal-zone;
 		polling-delay-passive = <100>;
 		polling-delay = <0>;
 		thermal-governor = "step_wise";
