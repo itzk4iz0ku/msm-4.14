@@ -372,8 +372,6 @@ rmnet_map_ingress_handler(struct sk_buff *skb,
 {
 	struct sk_buff *skbn;
 
-	int (*rmnet_perf_core_deaggregate)(struct sk_buff *skb,
-					   struct rmnet_port *port);
 #if defined(CONFIG_ARGOS)
 	void (*rmnet_perf_core_deaggregate)(struct sk_buff *skb,
 					    struct rmnet_port *port);
