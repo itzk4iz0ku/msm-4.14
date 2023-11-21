@@ -136,3 +136,5 @@ Android.bp
 #
 build.sh
 out/
+regen-defconfig.sh
+temp/
