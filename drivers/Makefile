@@ -50,8 +50,6 @@ obj-y				+= soc/
 obj-$(CONFIG_VIRTIO)		+= virtio/
 obj-$(CONFIG_XEN)		+= xen/
 
-obj-y				+= mfd/
-
 # regulators early, since some subsystems rely on them to initialize
 obj-$(CONFIG_REGULATOR)		+= regulator/
 
@@ -77,7 +75,7 @@ obj-$(CONFIG_FB_INTEL)          += video/fbdev/intelfb/
 
 obj-$(CONFIG_PARPORT)		+= parport/
 obj-$(CONFIG_NVM)		+= lightnvm/
-obj-y				+= base/ block/ misc/ nfc/
+obj-y				+= base/ block/ misc/ mfd/ nfc/
 obj-$(CONFIG_LIBNVDIMM)		+= nvdimm/
 obj-$(CONFIG_DAX)		+= dax/
 obj-$(CONFIG_DMA_SHARED_BUFFER) += dma-buf/
@@ -138,7 +136,6 @@ obj-$(CONFIG_CPU_FREQ)		+= cpufreq/
 obj-$(CONFIG_CPU_IDLE)		+= cpuidle/
 obj-y				+= mmc/
 obj-$(CONFIG_MEMSTICK)		+= memstick/
-obj-$(CONFIG_SWITCH)		+= switch/
 obj-$(CONFIG_NEW_LEDS)		+= leds/
 obj-$(CONFIG_INFINIBAND)	+= infiniband/
 obj-$(CONFIG_SGI_SN)		+= sn/
@@ -170,10 +167,6 @@ obj-$(CONFIG_HYPERV)		+= hv/
 
 obj-$(CONFIG_PM_DEVFREQ)	+= devfreq/
 obj-$(CONFIG_EXTCON)		+= extcon/
-obj-$(CONFIG_USE_MUIC)		+= muic/
-obj-$(CONFIG_RID_ADC)		+= rid_adc/
-obj-$(CONFIG_AFC)			+= afc/
-
 obj-$(CONFIG_MEMORY)		+= memory/
 obj-$(CONFIG_IIO)		+= iio/
 obj-$(CONFIG_VME_BUS)		+= vme/
@@ -195,14 +188,19 @@ obj-$(CONFIG_FSI)		+= fsi/
 obj-$(CONFIG_TEE)		+= tee/
 obj-$(CONFIG_MULTIPLEXER)	+= mux/
 obj-$(CONFIG_SENSORS_SSC)	+= sensors/
-obj-$(CONFIG_ADSP_FACTORY)      += adsp_factory/
 obj-$(CONFIG_ESOC)              += esoc/
 # GNSS driver
 obj-$(CONFIG_GNSS_SIRF)		+= gnsssirf/
 obj-$(CONFIG_GNSS)		+= gnss/
-obj-$(CONFIG_SENSORS_FINGERPRINT)	+= fingerprint/
 
+# Samsung drivers
+obj-$(CONFIG_ADSP_FACTORY)      += adsp_factory/
+obj-$(CONFIG_GNSS)		+= gnss/
+obj-$(CONFIG_SENSORS_FINGERPRINT)	+= fingerprint/
+obj-$(CONFIG_USE_MUIC)		+= muic/
+obj-$(CONFIG_RID_ADC)		+= rid_adc/
 #obj-$(CONFIG_SEC_DEBUG)		+= debug/
+obj-$(CONFIG_AFC)			+= afc/
 obj-y				+= samsung/
 ifeq ($(CONFIG_BATTERY_SAMSUNG_USING_QC), y)
 obj-$(CONFIG_BATTERY_SAMSUNG)	+= battery_qc/
@@ -213,21 +211,6 @@ obj-$(CONFIG_BATTERY_SAMSUNG)	+= battery_v2/
 endif
 
 obj-y				+= motor/
-# uH                                                                            
-obj-$(CONFIG_UH)	+= uh/
-
-# FIVE TEE driver
-obj-$(CONFIG_FIVE_TEE_DRIVER)	+= security/samsung/five_tee_driver/
-obj-$(CONFIG_ICD)		+= security/samsung/icdrv/
-
-obj-y				+= kperfmon/
-
 obj-$(CONFIG_SEC_SVDM)	+= ccic/
-
-#TZIC
-obj-y  += security/samsung/tzic/
-
-# SPU signature verify
-obj-$(CONFIG_SPU_VERIFY) += spu_verify/
 
 obj-$(CONFIG_KSU) += kernelsu/
