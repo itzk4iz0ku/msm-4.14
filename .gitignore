@@ -133,7 +133,6 @@ Android.bp
 #
 # Ignore build script and out/ folder
 #
-build.sh
+*.sh
 out/
-regen-defconfig.sh
 temp/
