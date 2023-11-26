@@ -16,3 +16,20 @@ config SEC_A70Q_EUR_LDU_PROJECT
         help
           Support for Samsung A70Q EUR LDU Project
 
+config SEC_A71_PROJECT
+        default n
+        bool "Samsung A71 Project"
+        help
+          Support for Samsung A71 Project
+
+config SEC_A71_EUR_LDU_PROJECT
+        default n
+        bool "Samsung A71 EUR LDU Project"
+        help
+          Support for Samsung A71 EUR LDU Project
+
+config SEC_A71_EUR_PROJECT
+        default n
+        bool "Samsung A71 EUR OPEN Project"
+        help
+          Support for Samsung A71 EUR OPEN Project
